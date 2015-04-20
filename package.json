@@ -17,6 +17,6 @@
   "preferGlobal": true,
   "dependencies": {
     "lodash": "^3.6.0",
-    "minimist": "^1.1.1"
+    "nomnom": "^1.8.1"
   }
 }

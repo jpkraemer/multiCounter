@@ -3,6 +3,7 @@
 var fs = require ("fs"); 
 var pathUtils = require("path");
 var _ = require("lodash");
+var nomnom = require("nomnom");
 
 var config = {
 	folder: ".",
@@ -60,34 +61,10 @@ function printSummary(result, folder) {
 	console.log("");
 }
 
-var args = process.argv; 
-args.splice(0, 2);
-
-if (args.length === 0) {
-	console.log("Multi Counter"); 
-	console.log("");
-	console.log("Usage: multiCounter [options] directory");
-	console.log("Options: ");
-	console.log("  --config FILE \t JSON File. Valid config options are: ");
-	console.log("\t\tpatterns \t An array of JSON objects with a name (string) and a pattern (regex as string) key. ");
-	console.log("\t\tfilePattern \t A regex as string. Will count only in files matching this if present.");
-	console.log("\t\tdepth \t A number. How deep the directory hierarchy will be traversed. Default: 0");
-	process.exit(0);
-}
-
-var argv = require("minimist")(args);
-
-if (argv._.length === 0) {
-	console.error("Need to provide a directory containing files");
-	process.exit(1);
-} else {
-	config.folder = argv._[0];
-}
-
-if (argv.patterns !== undefined) {
-	var stats = fs.statSync(argv.patterns);
+function checkConfigFile(configFile) {
+	var stats = fs.statSync(configFile);
 	if (stats.isFile()) {
-		var patternsString = fs.readFileSync(argv.patterns, { encoding: "utf8" });
+		var patternsString = fs.readFileSync(configFile, { encoding: "utf8" });
 		try {
 			var parsedPatterns = JSON.parse(patternsString); 
 			if (parsedPatterns.patterns !== undefined) {
@@ -115,24 +92,39 @@ if (argv.patterns !== undefined) {
 				}
 			}
 		} catch (e) {
-			console.error("Error parsing patterns file");
-			process.exit(1);
+			return "Error parsing patterns file";
 		}
 	} else {
-		console.error("Patterns option requires a file");
-		process.exit(1);
-	}
-} 
-
-if (argv.depth !== undefined) {
-	if (typeof(argv.depth) === "number") {
-		config.depth = argv.depth;
-	} else {
-		console.error("Depth option requires a number parameter");
-		process.exit(1);
+		return "Patterns option requires a file";
 	}
 }
 
+var opts = require("nomnom")
+	.option('config', {
+		abbr: 'c',
+		metavar: 'FILE',
+		help: 'A JSON File. Config options are: patterns: { name: string, pattern: RegEx as string }, filePattern: RegEx as string, depth: int',
+		callback: checkConfigFile
+	})
+	.option('depth', {
+		abbr: 'd',
+		help: 'How deep the directory hierarchy will be traversed. Overwrites value from config. Default: 0',
+		callback: function (depth) { 
+			if (depth != parseInt(depth)) {
+				return "Depth needs to be a number";
+			} else {
+				config.depth = parseInt(depth);
+			}
+		}
+	})
+	.option('files', {
+		position: 0,
+		help: 'The directory in which to count. Required.',
+		required: true
+	})
+	.parse();
+
+config.folder = opts.files;
 if (config.folder.match(/.*\/$/) === null) {
 	config.folder += "/";
 }
