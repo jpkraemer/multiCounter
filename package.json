@@ -9,6 +9,10 @@
   "keywords": [
     "counter"
   ],
+  "repository": {
+    "type": "git", 
+    "url": "https://github.com/jpkraemer/multiCounter.git"
+  }
   "author": "Jan-Peter Krämer",
   "license": "ISC",
   "bin": {
