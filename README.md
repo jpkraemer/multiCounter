@@ -2,7 +2,7 @@
 Multi Counter is a simple commandline app to count certain lines in text files. For example, if you have a folder full of logs and are interested in, say, three different types of log statements that you need to count, Multi Counter is for you. 
 
 ## Installation 
-    npm install -g multiCounter
+    npm install -g multi-counter
 
 ## Usage
 Start by `multiCounter some/log/dir`. It will output something like this: 
